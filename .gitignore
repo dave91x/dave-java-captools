@@ -3,6 +3,7 @@
 .idea
 
 schema.json
+JavaCaptricityClient.java
 
 *.class
 
