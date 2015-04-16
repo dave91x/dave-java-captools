@@ -117,7 +117,7 @@ for r in resources:
         # do makeGetObjectCall
         jfile.write("  public JSONObject get" + make_method_name(r['display_name']) + "() throws Exception {\n")
         jfile.write("    String uri = \"https://shreddr.captricity.com/api/v1/\";\n")
-        jfile.write("    JSONArray response = makeGetArrayCall(uri);\n")
+        jfile.write("    JSONObject response = makeGetObjectCall(uri);\n")
       jfile.write("    return response;\n")  
       jfile.write("  }\n")
       jfile.write("  \n")
