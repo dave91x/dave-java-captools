@@ -121,7 +121,9 @@ for r in resources:
       jfile.write("    return response;\n")  
       jfile.write("  }\n")
       jfile.write("  \n")
-        
+    
+    if 'DELETE' in allowed_methods:
+      
 
 print
 print "Total number of endpoints:  %s" % ct
