@@ -18,6 +18,7 @@ def make_method_name(display_name):
   return REMOVE_SPACES_RE.sub("", display_name)
 
 def generate_uri_from_regex(uri):
+  # "regex": "^/api/v1/batch-file/(?P<id>\\d+)/page/(?P<page>\\d+)/thumbnail/(?P<size>[^/]+)$",
   return uri
 
 print abs_file_path
@@ -96,7 +97,7 @@ jfile.write("  private JSONObject makeDeleteCall(String target) throws Exception
 jfile.write("    CloseableHttpClient client = HttpClients.createDefault();\n")
 jfile.write("    try {\n")
 jfile.write("      HttpDelete deleteRequest = new HttpDelete(target);\n")
-jfile.write("      deleteRequest.addHeader("Captricity-API-Token", apiToken);\n")
+jfile.write("      deleteRequest.addHeader(\"Captricity-API-Token\", apiToken);\n")
 jfile.write("      CloseableHttpResponse response = client.execute(deleteRequest);\n")
 jfile.write("      HttpEntity entity = response.getEntity();\n")
 jfile.write("      if (entity != null) {\n")
@@ -121,24 +122,30 @@ for r in resources:
     spt_ct += 1
     print "%s" % r['display_name']
     # print "%s:  %s" % (r['display_name'] , r['doc'])
+    method_doc = r['doc'].splitlines()
     allowed_methods = r['allowed_request_methods']
+    arguments = r['arguments']
     print "Allowed methods:  %s" % ", ".join(allowed_methods)
     print
     
     if 'GET' in allowed_methods:
       jfile.write("  /**\n")
-      jfile.write("   * \n")
-      jfile.write("   * \n")
+      for line in method_doc:
+        jfile.write("   * " + line.strip() + "\n")
+      if len(arguments) > 0:
+        jfile.write("   *\n")
+        for arg in arguments:
+          jfile.write("   * @param " + arg + "\n")
       jfile.write("   */\n")
       
       if r['is_list']:
         # do makeGetArrayCall
-        jfile.write("  public JSONArray get" + make_method_name(r['display_name']) + "() throws Exception {\n")
+        jfile.write("  public JSONArray get" + make_method_name(r['display_name']) + "(" + ", ".join(arguments) + ") throws Exception {\n")
         jfile.write("    String uri = \"https://shreddr.captricity.com/api/v1/\";\n")
         jfile.write("    JSONArray response = makeGetArrayCall(uri);\n")
       else:
         # do makeGetObjectCall
-        jfile.write("  public JSONObject get" + make_method_name(r['display_name']) + "() throws Exception {\n")
+        jfile.write("  public JSONObject get" + make_method_name(r['display_name']) + "(" + ", ".join(arguments) + ") throws Exception {\n")
         jfile.write("    String uri = \"https://shreddr.captricity.com/api/v1/\";\n")
         jfile.write("    JSONObject response = makeGetObjectCall(uri);\n")
       jfile.write("    return response;\n")  
@@ -147,14 +154,19 @@ for r in resources:
     
     if 'DELETE' in allowed_methods:
       jfile.write("  /**\n")
-      jfile.write("   * \n")
-      jfile.write("   * \n")
+      for line in method_doc:
+        jfile.write("   * " + line.strip() + "\n")
+      if len(arguments) > 0:
+        jfile.write("   *\n")
+        for arg in arguments:
+          jfile.write("   * @param " + arg + "\n")
       jfile.write("   */\n")
-      jfile.write("  public JSONObject delete" + make_method_name(r['display_name']) + "(int ItemID) throws Exception {\n")
+      jfile.write("  public JSONObject delete" + make_method_name(r['display_name']) + "(" + ", ".join(arguments) + ") throws Exception {\n")
       jfile.write("    String uri = \"https://shreddr.captricity.com/api/v1/\";\n")
       jfile.write("    JSONObject response = makeDeleteCall(uri);\n")
       jfile.write("    return response;\n")
       jfile.write("  }\n")
+      jfile.write("  \n")
 
 print
 print "Total number of endpoints:  %s" % ct
