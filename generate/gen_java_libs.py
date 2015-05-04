@@ -92,7 +92,25 @@ jfile.write("    }\n")
 jfile.write("    return new JSONObject();\n")
 jfile.write("  }\n")
 jfile.write("  \n")
-
+jfile.write("  private JSONObject makeDeleteCall(String target) throws Exception {\n")
+jfile.write("    CloseableHttpClient client = HttpClients.createDefault();\n")
+jfile.write("    try {\n")
+jfile.write("      HttpDelete deleteRequest = new HttpDelete(target);\n")
+jfile.write("      deleteRequest.addHeader("Captricity-API-Token", apiToken);\n")
+jfile.write("      CloseableHttpResponse response = client.execute(deleteRequest);\n")
+jfile.write("      HttpEntity entity = response.getEntity();\n")
+jfile.write("      if (entity != null) {\n")
+jfile.write("        String json_string = EntityUtils.toString(entity);\n")
+jfile.write("        return new JSONObject(json_string);\n")
+jfile.write("      }\n")
+jfile.write("    } catch (Exception e) {\n")
+jfile.write("      e.printStackTrace();\n")
+jfile.write("    } finally {\n")
+jfile.write("      client.close();\n")
+jfile.write("    }\n")
+jfile.write("    return new JSONObject();\n")
+jfile.write("  }\n")
+jfile.write("  \n")
 
 resources = schema['resources']
 
@@ -108,6 +126,11 @@ for r in resources:
     print
     
     if 'GET' in allowed_methods:
+      jfile.write("  /**\n")
+      jfile.write("   * \n")
+      jfile.write("   * \n")
+      jfile.write("   */\n")
+      
       if r['is_list']:
         # do makeGetArrayCall
         jfile.write("  public JSONArray get" + make_method_name(r['display_name']) + "() throws Exception {\n")
@@ -123,7 +146,15 @@ for r in resources:
       jfile.write("  \n")
     
     if 'DELETE' in allowed_methods:
-      
+      jfile.write("  /**\n")
+      jfile.write("   * \n")
+      jfile.write("   * \n")
+      jfile.write("   */\n")
+      jfile.write("  public JSONObject delete" + make_method_name(r['display_name']) + "(int ItemID) throws Exception {\n")
+      jfile.write("    String uri = \"https://shreddr.captricity.com/api/v1/\";\n")
+      jfile.write("    JSONObject response = makeDeleteCall(uri);\n")
+      jfile.write("    return response;\n")
+      jfile.write("  }\n")
 
 print
 print "Total number of endpoints:  %s" % ct
