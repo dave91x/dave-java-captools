@@ -12,9 +12,11 @@ schema = json.load(schema_file)
 output_file_path = os.path.join(script_dir, "../src/JavaCaptricityClient.java")
 jfile = open(output_file_path, 'w')
 
+CAP_URI = "https://shreddr.captricity.com"
 REMOVE_SPACES_RE = re.compile(r"\s+")
 PARAM_BLOCKS = re.compile("(\(.*?\))")
 PARAM_NAME = re.compile("<(.*?)>")
+URI_CLEANUP = re.compile(' \+ "$')
 
 def make_method_name(display_name):
   return REMOVE_SPACES_RE.sub("", display_name)
@@ -35,19 +37,28 @@ def gen_param_list(params):
 
 def generate_uri_from_regex(uri):
   # "regex": "^/api/v1/batch-file/(?P<id>\\d+)/page/(?P<page>\\d+)/thumbnail/(?P<size>[^/]+)$",
-  param_setup = []
+  param_list = []
   mod_uri = uri[1:-1]
   mod_uri = PARAM_BLOCKS.sub("_______", mod_uri)  # put 7 underscores in place of param blocks
-  param_setup.append(mod_uri)
+  
   m = PARAM_BLOCKS.findall(uri)
   if m:
-    # print len(m)
-    for x in m:
-      p = PARAM_NAME.search(x)
-      if p:
-        # print p.group(1)
-        param_setup.append(p.group(1))
-  return param_setup
+      for x in m:
+          p = PARAM_NAME.search(x)
+          if p:
+              param_list.append(p.group(1))
+  
+  if len(param_list) > 0:
+    for p in param_list:
+      mod_uri = re.sub("_______", "\" + {} + \"".format(p), mod_uri, count=1)  # re.sub(pattern, repl, string, count=0, flags=0)
+  
+  mod2_uri = CAP_URI + mod_uri
+  if URI_CLEANUP.search(mod2_uri):
+    final_uri = URI_CLEANUP.sub("", mod2_uri)
+  else:
+    final_uri = mod2_uri + "\""
+  
+  return final_uri
 
 print abs_file_path
 print schema['name']
@@ -169,12 +180,12 @@ for r in resources:
       if r['is_list']:
         # do makeGetArrayCall
         jfile.write("  public JSONArray get" + make_method_name(r['display_name']) + "(" + ", ".join(gen_param_list(arguments)) + ") throws Exception {\n")
-        jfile.write("    String uri = \"https://shreddr.captricity.com" + generate_uri_from_regex(r['regex'])[0] + "\";\n")
+        jfile.write("    String uri = \"" + generate_uri_from_regex(r['regex']) + ";\n")
         jfile.write("    JSONArray response = makeGetArrayCall(uri);\n")
       else:
         # do makeGetObjectCall
         jfile.write("  public JSONObject get" + make_method_name(r['display_name']) + "(" + ", ".join(gen_param_list(arguments)) + ") throws Exception {\n")
-        jfile.write("    String uri = \"https://shreddr.captricity.com" + generate_uri_from_regex(r['regex'])[0] + "\";\n")
+        jfile.write("    String uri = \"" + generate_uri_from_regex(r['regex']) + ";\n")
         jfile.write("    JSONObject response = makeGetObjectCall(uri);\n")
       jfile.write("    return response;\n")  
       jfile.write("  }\n")
@@ -196,7 +207,7 @@ for r in resources:
           jfile.write("   * @param " + arg + "\n")
       jfile.write("   */\n")
       jfile.write("  public JSONObject delete" + make_method_name(r['display_name']) + "(" + ", ".join(gen_param_list(arguments)) + ") throws Exception {\n")
-      jfile.write("    String uri = \"https://shreddr.captricity.com" + generate_uri_from_regex(r['regex'])[0] + "\";\n")
+      jfile.write("    String uri = \"" + generate_uri_from_regex(r['regex']) + ";\n")
       jfile.write("    JSONObject response = makeDeleteCall(uri);\n")
       jfile.write("    return response;\n")
       jfile.write("  }\n")

@@ -28,7 +28,7 @@ print
 plist = ['id', 'instance_set_id', 'size', 'bozo']
 print ", ".join(gen_param_list(plist))
 
-sys.exit()
+# sys.exit()
 
 
 # doc = "A list of batch files in the batch. See the batch file resource for an explanation of batch.\n    <p>The POST arguments are:</p>\n    <ul>\n        <li>batch (implicit): the batch is implied in the URL and is not required in the POST arguments.</li>\n        <li>file_name (optional): The name of this file. The name must be unique per batch. If not given, the name of the uploaded_file will be used.</li>\n        <li>uploaded_file: The file to be uploaded.</li>\n        <li>uploaded_with (optional): The method by which the file is uploaded. See the Batch File resource for explanation.</li>\n    </ul>"
@@ -51,13 +51,16 @@ sys.exit()
 
 PARAM_BLOCKS = re.compile("(\(.*?\))")
 PARAM_NAME = re.compile("<(.*?)>")
+URI_CLEANUP = re.compile(' \+ "$')
 
 def generate_uri_from_regex(uri):
   # "regex": "^/api/v1/batch-file/(?P<id>\\d+)/page/(?P<page>\\d+)/thumbnail/(?P<size>[^/]+)$",
-  param_setup = []
+  print uri
+  param_list = []
   mod_uri = uri[1:-1]
   mod_uri = PARAM_BLOCKS.sub("_______", mod_uri)  # put 7 underscores in place of param blocks
-  param_setup.append(mod_uri)
+  # param_setup.append()
+  
   m = PARAM_BLOCKS.findall(uri)
   if m:
       # print len(m)
@@ -65,20 +68,32 @@ def generate_uri_from_regex(uri):
           p = PARAM_NAME.search(x)
           if p:
               # print p.group(1)
-              param_setup.append(p.group(1))
-  return param_setup
+              param_list.append(p.group(1))
+  
+  print param_list
+  if len(param_list) > 0:
+    for p in param_list:
+      mod_uri = re.sub("_______", "\" + {} + \"".format(p), mod_uri, count=1)  # re.sub(pattern, repl, string, count=0, flags=0)
+  
+  mod2_uri = "https://shreddr.captricity.com" + mod_uri
+  if URI_CLEANUP.search(mod2_uri):
+    final_uri = URI_CLEANUP.sub("", mod2_uri)
+  else:
+    final_uri = mod2_uri + "\""
+  
+  return final_uri
 
 
-print generate_uri_from_regex("^/api/v1/batch-file/(?P<id>\\d+)/page/(?P<page>\\d+)/thumbnail/(?P<size>[^/]+)$")
-
+x = generate_uri_from_regex("^/api/v1/batch-file/(?P<id>\\d+)/page/(?P<page>\\d+)/thumbnail/(?P<size>[^/]+)$")
+print "String uri = \"" + x + ";\n"
 print
 
-print generate_uri_from_regex("^/api/v1/batch-file/download/$")
-
+y = generate_uri_from_regex("^/api/v1/batch-file/download/$")
+print "String uri = \"" + y + ";\n"
 print
 
-print generate_uri_from_regex("^/api/v1/batch-file/(?P<id>\\d+)/$")
-
+z = generate_uri_from_regex("^/api/v1/batch-file/(?P<id>\\d+)/$")
+print "String uri = \"" + z + ";\n"
 print
 
 
