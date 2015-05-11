@@ -1,7 +1,7 @@
 import re
 import sys
 
-
+# javadoc -d doc src/JavaCaptricityClient.java
 
 d = { "a": 1, "b": 2, "c": 3}
 

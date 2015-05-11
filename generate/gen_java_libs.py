@@ -60,6 +60,15 @@ def generate_uri_from_regex(uri):
   
   return final_uri
 
+def get_method_return_type(verb='GET', is_list=False):
+  if verb == "GET":
+    if is_list:
+      return "JSONArray"
+    else:
+      return "JSONObject"
+  else:
+    return "JSONObject"
+
 print abs_file_path
 print schema['name']
 print schema['endpoint']
@@ -181,6 +190,10 @@ for r in resources:
         jfile.write("   *\n")
         for arg in arguments:
           jfile.write("   * @param " + arg + "\n")
+      jfile.write("   *\n")
+      jfile.write("   * @throws Exception\n")
+      jfile.write("   *\n")
+      jfile.write("   * @return " + get_method_return_type('GET', r['is_list']))
       jfile.write("   */\n")
       
       if r['is_list']:
@@ -211,6 +224,10 @@ for r in resources:
         jfile.write("   *\n")
         for arg in arguments:
           jfile.write("   * @param " + arg + "\n")
+      jfile.write("   *\n")
+      jfile.write("   * @throws Exception\n")
+      jfile.write("   *\n")
+      jfile.write("   * @return JSONObject")
       jfile.write("   */\n")
       jfile.write("  public JSONObject delete" + make_method_name(r['display_name']) + "(" + ", ".join(gen_param_list(arguments)) + ") throws Exception {\n")
       jfile.write("    String uri = \"" + generate_uri_from_regex(r['regex']) + ";\n")
