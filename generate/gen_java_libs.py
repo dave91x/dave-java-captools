@@ -164,6 +164,7 @@ for r in resources:
     method_doc = r['doc'].splitlines()
     allowed_methods = r['allowed_request_methods']
     arguments = r['arguments']
+    pdoc = r['property_doc']
     print "Allowed methods:  %s" % ", ".join(allowed_methods)
     print
     
@@ -171,6 +172,11 @@ for r in resources:
       jfile.write("  /**\n")
       for line in method_doc:
         jfile.write("   * " + line.strip() + "\n")
+      if len(pdoc) > 0:
+        jfile.write("   *\n")
+        jfile.write("   * Object Property List:\n")
+        for pdk in sorted(pdoc.keys()):
+          jfile.write("   * " + pdk + ": &nbsp;" + pdoc[pdk] + "\n")
       if len(arguments) > 0:
         jfile.write("   *\n")
         for arg in arguments:

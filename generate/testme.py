@@ -1,7 +1,14 @@
-
 import re
 import sys
 
+
+
+d = { "a": 1, "b": 2, "c": 3}
+
+print len(d)
+
+
+sys.exit()
 
 def param_typesetter(name):
     n = {'id': 'int', 'size': 'String'}
