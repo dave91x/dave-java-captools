@@ -35,6 +35,14 @@ def gen_param_list(params):
     final_params.append(b)
   return final_params
 
+def param_description(name):
+  if name == 'id' or re.search("_id", name):
+    return "ID of object"
+  elif name == 'size':
+    return "the desired width in pixels followed by a lowercase 'w'"
+  else:
+    return "other param"
+
 def generate_uri_from_regex(uri):
   # "regex": "^/api/v1/batch-file/(?P<id>\\d+)/page/(?P<page>\\d+)/thumbnail/(?P<size>[^/]+)$",
   param_list = []
@@ -74,6 +82,7 @@ print schema['name']
 print schema['endpoint']
 print "Version:  " + schema['version']
 print output_file_path
+print
 
 jfile.write("package com.captricity.api;\n")
 jfile.write("\n")
@@ -91,10 +100,25 @@ jfile.write("import org.apache.http.entity.mime.MultipartEntityBuilder;\n")
 jfile.write("import org.apache.http.util.EntityUtils;\n")
 jfile.write("import org.json.*;\n")
 jfile.write("\n")
+jfile.write("/**\n")
+jfile.write(" * Captricity API client library written in Java.\n")
+jfile.write(" *\n")
+jfile.write(" * @author Dave Shewfelt\n")
+jfile.write(" * @author Lucas Beeler\n")
+jfile.write(" * @version 1.0 Build 1000 May 31, 2015\n")
+jfile.write(" */\n")
 jfile.write("public class JavaCaptricityClient {\n")
 jfile.write("  \n")
+jfile.write("  /**\n")
+jfile.write("   * Every instance of a Captricity API client object must be based on a Captricity-supplied API token.\n")
+jfile.write("   */\n")
 jfile.write("  private String apiToken;\n")
 jfile.write("  \n")
+jfile.write("  /**\n")
+jfile.write("   * Create a Captricity API client object\n")
+jfile.write("   *\n")
+jfile.write("   * @param token Captricity-supplied API security token\n")
+jfile.write("   */\n")
 jfile.write("  public JavaCaptricityClient(String token) {\n")
 jfile.write("    apiToken = token;\n")
 jfile.write("  }\n")
@@ -183,17 +207,19 @@ for r in resources:
         jfile.write("   * " + line.strip() + "\n")
       if len(pdoc) > 0:
         jfile.write("   *\n")
-        jfile.write("   * Object Property List:\n")
+        jfile.write("   * <p>Object Property List:</p>\n")
+        jfile.write("   * <table summary=\"Object Properties\" border=\"1\" cellpadding=\"2\">\n")
         for pdk in sorted(pdoc.keys()):
-          jfile.write("   * " + pdk + ": &nbsp;" + pdoc[pdk] + "\n")
+          jfile.write("   * <tr><td>" + pdk + ":</td><td>" + pdoc[pdk] + "</td></tr>\n")
+        jfile.write("   * </table>\n")
       if len(arguments) > 0:
         jfile.write("   *\n")
         for arg in arguments:
-          jfile.write("   * @param " + arg + "\n")
+          jfile.write("   * @param " + arg + " " + param_description(arg) +"\n")
       jfile.write("   *\n")
-      jfile.write("   * @throws Exception\n")
+      jfile.write("   * @throws Exception from use of HTTPClient library\n")
       jfile.write("   *\n")
-      jfile.write("   * @return " + get_method_return_type('GET', r['is_list']))
+      jfile.write("   * @return " + get_method_return_type('GET', r['is_list']) + "\n")
       jfile.write("   */\n")
       
       if r['is_list']:
@@ -223,11 +249,11 @@ for r in resources:
       if len(arguments) > 0:
         jfile.write("   *\n")
         for arg in arguments:
-          jfile.write("   * @param " + arg + "\n")
+          jfile.write("   * @param " + arg + " " + param_description(arg) +"\n")
       jfile.write("   *\n")
-      jfile.write("   * @throws Exception\n")
+      jfile.write("   * @throws Exception from use of HTTPClient library\n")
       jfile.write("   *\n")
-      jfile.write("   * @return JSONObject")
+      jfile.write("   * @return JSONObject\n")
       jfile.write("   */\n")
       jfile.write("  public JSONObject delete" + make_method_name(r['display_name']) + "(" + ", ".join(gen_param_list(arguments)) + ") throws Exception {\n")
       jfile.write("    String uri = \"" + generate_uri_from_regex(r['regex']) + ";\n")
